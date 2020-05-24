@@ -10,6 +10,7 @@ class AgePrognosesTest(unittest.TestCase):
         self.pop_size = 1000
         self.pop_infected = 10
         self.number_iterations = 5
+        self.duration_offset = 5
         self.sim = None
         self.numerator_channel = None
         self.denominator_channel = None
@@ -32,20 +33,30 @@ class AgePrognosesTest(unittest.TestCase):
         self.sim.run(verbose=0)
         sim_result = self.sim.to_json(tostring=False)['results']
         numerator = sim_result[self.numerator_channel][-1]
-        denominator = sim_result[self.denominator_channel][-1]
+        denominator = sim_result[self.denominator_channel][-self.duration_offset]
         return numerator, denominator
 
     def set_severe_test(self):
         self.numerator_channel = 'cum_severe'
         self.denominator_channel = 'cum_symptomatic'
         self.prognosis_name = 'severe_probs'
+        self.duration_under_test = 'sym2sev'
         pass
 
     def set_symptomatic_test(self):
         self.numerator_channel = 'cum_symptomatic'
         self.denominator_channel = 'cum_infections'
         self.prognosis_name = 'symp_probs'
+        self.duration_under_test = 'inf2sym'
         pass
+
+    def set_duration_offset(self):
+        delay_to_test_state = {
+            "dist": "normal",
+            "par1": self.duration_offset,
+            "par2": 0
+        }
+        self.sim['dur'][self.duration_under_test] = delay_to_test_state
 
     def get_min_max_prognoses(self, min_age_bucket):
         min_prognosis = self.sim['prognoses'][self.prognosis_name][min_age_bucket]
@@ -81,6 +92,7 @@ class AgePrognosesTest(unittest.TestCase):
         total_denominator = 0
         for seed in range(0, self.number_iterations):
             self.initialize_sim_ages_to(age_under_test)
+            self.set_duration_offset()
             numerator, denominator = self.collect_sim_results(seed=seed)
             total_numerator += numerator
             total_denominator += denominator
@@ -93,6 +105,7 @@ class AgePrognosesTest(unittest.TestCase):
         total_denominator = 0
         for seed in range(0, self.number_iterations):
             self.initialize_sim_ages_to(age_under_test)
+            self.set_duration_offset()
             numerator, denominator = self.collect_sim_results(seed=seed)
             total_numerator += numerator
             total_denominator += denominator
@@ -240,3 +253,4 @@ class AgePrognosesTest(unittest.TestCase):
         self.evaluate_results(total_numerator=total_numerator,
                               total_denominator=total_denominator,
                               lower_age_bucket=lower_age_bucket)
+   
