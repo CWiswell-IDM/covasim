@@ -9,8 +9,6 @@ class AgePrognosesTest(unittest.TestCase):
         self.parameters = cv.make_pars()
         self.pop_size = 1000
         self.pop_infected = 10
-        self.parameters['pop_size'] = self.pop_size
-        self.parameters['pop_infected'] = self.pop_infected
         self.number_iterations = 5
         self.sim = None
         self.numerator_channel = None
@@ -22,6 +20,8 @@ class AgePrognosesTest(unittest.TestCase):
         pass
 
     def initialize_sim_ages_to(self, age):
+        self.parameters['pop_size'] = self.pop_size
+        self.parameters['pop_infected'] = self.pop_infected
         self.sim = cv.Sim(pars=self.parameters)
         self.sim.initialize()
         self.sim.people['age'][:] = age
@@ -34,6 +34,12 @@ class AgePrognosesTest(unittest.TestCase):
         numerator = sim_result[self.numerator_channel][-1]
         denominator = sim_result[self.denominator_channel][-1]
         return numerator, denominator
+
+    def set_severe_test(self):
+        self.numerator_channel = 'cum_severe'
+        self.denominator_channel = 'cum_symptomatic'
+        self.prognosis_name = 'severe_probs'
+        pass
 
     def set_symptomatic_test(self):
         self.numerator_channel = 'cum_symptomatic'
@@ -67,6 +73,19 @@ class AgePrognosesTest(unittest.TestCase):
         assert average_numerator < expected_numerator_max, \
             f"Average numerator {average_numerator} should be lower than expected max {expected_numerator_max}"
         pass
+
+    def run_severe_test_by_age(self, age_under_test):
+        self.pop_size = 3000
+        self.set_severe_test()
+        total_numerator = 0
+        total_denominator = 0
+        for seed in range(0, self.number_iterations):
+            self.initialize_sim_ages_to(age_under_test)
+            numerator, denominator = self.collect_sim_results(seed=seed)
+            total_numerator += numerator
+            total_denominator += denominator
+            pass
+        return total_numerator, total_denominator
 
     def run_symptomatic_test_by_age(self, age_under_test):
         self.set_symptomatic_test()
@@ -158,6 +177,66 @@ class AgePrognosesTest(unittest.TestCase):
         lower_age_bucket = 7
         total_numerator, total_denominator = \
             self.run_symptomatic_test_by_age(age_under_test=age_under_test)
+        self.evaluate_results(total_numerator=total_numerator,
+                              total_denominator=total_denominator,
+                              lower_age_bucket=lower_age_bucket)
+
+    def test_severe_age35(self):
+        self.is_debugging = False
+        age_under_test = 35
+        lower_age_bucket = 2
+        total_numerator, total_denominator = \
+            self.run_severe_test_by_age(age_under_test=age_under_test)
+        self.evaluate_results(total_numerator=total_numerator,
+                              total_denominator=total_denominator,
+                              lower_age_bucket=lower_age_bucket)
+
+    def test_severe_age45(self):
+        self.is_debugging = False
+        age_under_test = 45
+        lower_age_bucket = 3
+        total_numerator, total_denominator = \
+            self.run_severe_test_by_age(age_under_test=age_under_test)
+        self.evaluate_results(total_numerator=total_numerator,
+                              total_denominator=total_denominator,
+                              lower_age_bucket=lower_age_bucket)
+
+    def test_severe_age55(self):
+        self.is_debugging = False
+        age_under_test = 55
+        lower_age_bucket = 4
+        total_numerator, total_denominator = \
+            self.run_severe_test_by_age(age_under_test=age_under_test)
+        self.evaluate_results(total_numerator=total_numerator,
+                              total_denominator=total_denominator,
+                              lower_age_bucket=lower_age_bucket)
+
+    def test_severe_age65(self):
+        self.is_debugging = False
+        age_under_test = 65
+        lower_age_bucket = 5
+        total_numerator, total_denominator = \
+            self.run_severe_test_by_age(age_under_test=age_under_test)
+        self.evaluate_results(total_numerator=total_numerator,
+                              total_denominator=total_denominator,
+                              lower_age_bucket=lower_age_bucket)
+
+    def test_severe_age75(self):
+        self.is_debugging = False
+        age_under_test = 75
+        lower_age_bucket = 6
+        total_numerator, total_denominator = \
+            self.run_severe_test_by_age(age_under_test=age_under_test)
+        self.evaluate_results(total_numerator=total_numerator,
+                              total_denominator=total_denominator,
+                              lower_age_bucket=lower_age_bucket)
+
+    def test_severe_age85(self):
+        self.is_debugging = True
+        age_under_test = 85
+        lower_age_bucket = 7
+        total_numerator, total_denominator = \
+            self.run_severe_test_by_age(age_under_test=age_under_test)
         self.evaluate_results(total_numerator=total_numerator,
                               total_denominator=total_denominator,
                               lower_age_bucket=lower_age_bucket)
