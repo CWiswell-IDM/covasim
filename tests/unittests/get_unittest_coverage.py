@@ -13,6 +13,7 @@ from test_simulation_parameter import SimulationParameterTests
 from test_disease_transmission import DiseaseTransmissionTests
 from test_disease_progression import DiseaseProgressionTests
 from test_disease_mortality import DiseaseMortalityTests
+from test_interventions import InterventionTests
 # from test_diagnostic_testing import DiagnosticTestingTests
 
 test_classes_to_run = [TestSupportTests,
@@ -20,7 +21,8 @@ test_classes_to_run = [TestSupportTests,
                        DiseaseTransmissionTests,
                        DiseaseProgressionTests,
                        DiseaseMortalityTests,
-                       MiscellaneousFeatureTests]
+                       MiscellaneousFeatureTests,
+                       InterventionTests]
 
 suites_list = []
 for tc in test_classes_to_run:

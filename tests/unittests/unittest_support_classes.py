@@ -230,7 +230,8 @@ class CovaSimTest(unittest.TestCase):
             "dur": duration_node
         }
         self.set_simulation_parameters(params_dict=params_dict)
-
+        pass
+    # endregion
 
     def run_sim(self, params_dict=None, write_results_json=False, population_type=None):
         if not self.simulation_parameters or params_dict: # If we need one, or have one here
@@ -256,7 +257,6 @@ class CovaSimTest(unittest.TestCase):
             with open(self.expected_result_filename, 'w') as outfile:
                 json.dump(self.simulation_result, outfile, indent=4, sort_keys=True)
         pass
-    # endregion
 
     # region simulation results support
     def get_full_result_channel(self, channel):
@@ -288,7 +288,7 @@ class CovaSimTest(unittest.TestCase):
         self.interventions = change_beta(days=days_array,
                                          changes=multiplier_array,
                                          layers=layers)
-        pass
+        return self.interventions
 
     def intervention_set_test_prob(self, symptomatic_prob=0, asymptomatic_prob=0,
                                    asymptomatic_quarantine_prob=0, symp_quar_prob=0,
@@ -302,7 +302,7 @@ class CovaSimTest(unittest.TestCase):
                                        loss_prob=loss_prob,
                                        test_delay=test_delay,
                                        start_day=start_day)
-        pass
+        return self.interventions
 
     def intervention_set_contact_tracing(self,
                                          start_day,
@@ -320,7 +320,7 @@ class CovaSimTest(unittest.TestCase):
         self.interventions = contact_tracing(trace_probs=trace_probabilities,
                                              trace_time=trace_times,
                                              start_day=start_day)
-        pass
+        return self.interventions
 
     def intervention_build_sequence(self,
                                     day_list,
@@ -328,6 +328,7 @@ class CovaSimTest(unittest.TestCase):
         my_sequence = sequence(days=day_list,
                                interventions=intervention_list)
         self.interventions = my_sequence
+        return self.interventions
     # endregion
 
     # region specialized simulation methods

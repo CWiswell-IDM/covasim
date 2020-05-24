@@ -133,26 +133,9 @@ class InterventionTests(CovaSimTest):
                                    f"(with {total_infections[next_multiplier]} infections)")
 
     def test_change_beta_layers_clustered(self):
-        '''
-        Suggested alternative implementation:
-
-            import covasim as cv
-
-            # Define the interventions
-            days = dict(h=30, s=35, w=40, c=45)
-            interventions = []
-            for key,day in days.items():
-                interventions.append(cv.change_beta(days=day, changes=0, layers=key))
-
-            # Create and run the sim
-            sim = cv.Sim(pop_type='hybrid', n_days=60, interventions=interventions)
-            sim.run()
-            assert sim.results['new_infections'].values[days['c']:].sum() == 0
-            sim.plot()
-        '''
         self.is_debugging = False
         initial_infected = 10
-        seed_list = range(0)
+        seed_list = range(1)
         for seed in seed_list:
             params = {
                 SimKeys.random_seed: seed,
@@ -163,33 +146,28 @@ class InterventionTests(CovaSimTest):
             if len(seed_list) > 1:
                 self.expected_result_filename = f"DEBUG_{self.id()}_{seed}.json"
             self.set_simulation_parameters(params_dict=params)
-            day_of_change = 25
+
             change_multipliers = [0.0]
-            layer_keys = ['c','h','s','w']
+            layer_days_dict = {'c':25, 'h':30, 's':35, 'w':40}
 
-            intervention_days = []
             intervention_list = []
-
-            for k in layer_keys: # Zero out one layer at a time
-                day_of_change += 5
-                self.intervention_set_changebeta(
-                    days_array=[day_of_change],
+            for layer, day in layer_days_dict.items():
+                intervention_list.append(self.intervention_set_changebeta(
+                    days_array=day,
                     multiplier_array=change_multipliers,
-                    layers=[k]
-                )
-                intervention_days.append(day_of_change)
-                intervention_list.append(self.interventions)
-                self.interventions = None
-                pass
+                    layers=layer
+                ))
+
             self.interventions = intervention_list
             self.run_sim(population_type='clustered')
-            last_intervention_day = intervention_days[-1]
-            first_intervention_day = intervention_days[0]
+            last_intervention_day = max(layer_days_dict.values())
+            first_intervention_day = min(layer_days_dict.values())
+
             cum_infections_channel= self.get_full_result_channel(ResultsKeys.infections_cumulative)
             if len(seed_list) > 1:
                 messages = []
-                if cum_infections_channel[intervention_days[0]-1] < initial_infected:
-                    messages.append(f"Before intervention at day {intervention_days[0]}, there should be infections happening.")
+                if cum_infections_channel[first_intervention_day-1] < initial_infected:
+                    messages.append(f"Before intervention at day {first_intervention_day}, there should be infections happening.")
                     pass
 
                 if cum_infections_channel[last_intervention_day] < cum_infections_channel[first_intervention_day]:
@@ -206,9 +184,9 @@ class InterventionTests(CovaSimTest):
                         print(f"\t{m}")
                         pass
 
-            self.assertGreater(cum_infections_channel[intervention_days[0]-1],
+            self.assertGreater(cum_infections_channel[first_intervention_day-1],
                                initial_infected,
-                               msg=f"Before intervention at day {intervention_days[0]}, there should be infections happening.")
+                               msg=f"Before intervention at day {first_intervention_day}, there should be infections happening.")
 
             self.assertGreater(cum_infections_channel[last_intervention_day],
                                cum_infections_channel[first_intervention_day],
@@ -223,7 +201,7 @@ class InterventionTests(CovaSimTest):
     def test_change_beta_layers_random(self):
         self.is_debugging = False
         initial_infected = 10
-        seed_list = range(0)
+        seed_list = range(1)
         for seed in seed_list:
             params = {
                 SimKeys.random_seed: seed,
@@ -281,7 +259,7 @@ class InterventionTests(CovaSimTest):
     def test_change_beta_layers_hybrid(self):
         self.is_debugging = False
         initial_infected = 10
-        seed_list = range(0)
+        seed_list = range(1)
         for seed in seed_list:
             params = {
                 SimKeys.random_seed: seed,
