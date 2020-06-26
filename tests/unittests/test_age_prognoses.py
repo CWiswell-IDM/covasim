@@ -253,4 +253,3 @@ class AgePrognosesTest(unittest.TestCase):
         self.evaluate_results(total_numerator=total_numerator,
                               total_denominator=total_denominator,
                               lower_age_bucket=lower_age_bucket)
-   
